@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\LeaveRequest;
 use App\Enum\LeaveStatus;
+use App\Enum\LeaveType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -31,6 +32,26 @@ class LeaveRequestRepository extends ServiceEntityRepository
             ->setParameter('status', LeaveStatus::PENDING)
             ->orderBy('r.submittedAt', 'ASC')
             ->addOrderBy('r.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Approved vacation requests for a specific employee.
+     *
+     * @return list<LeaveRequest>
+     */
+    public function findApprovedVacationsForEmployee(int $employeeId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.status = :status')
+            ->andWhere('r.type = :type')
+            ->andWhere('r.employee = :employee')
+            ->setParameter('status', LeaveStatus::APPROVED)
+            ->setParameter('type', LeaveType::VACATION)
+            ->setParameter('employee', $employeeId)
+            ->orderBy('r.startDate', 'ASC')
+            ->addOrderBy('r.endDate', 'ASC')
             ->getQuery()
             ->getResult();
     }

@@ -15,6 +15,8 @@ final readonly class Decision
         public LeaveStatus $status,
         public float $consumedDays,
         public string $reason,
+        /** @var array<int, float> $balanceAdjustments */
+        public array $balanceAdjustments = [],
     ) {
     }
 }

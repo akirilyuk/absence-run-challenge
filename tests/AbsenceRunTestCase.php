@@ -8,7 +8,10 @@ use App\Entity\LeaveBalance;
 use App\Entity\LeaveRequest;
 use App\Repository\LeaveBalanceRepository;
 use App\Repository\LeaveRequestRepository;
+use App\Service\EntitlementCalculator;
+use App\Service\HolidayCalendar;
 use App\Service\LeaveRequestProcessor;
+use App\Service\WorkingDayCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -46,7 +49,11 @@ abstract class AbsenceRunTestCase extends KernelTestCase
         \assert($requests instanceof LeaveRequestRepository);
         \assert($balances instanceof LeaveBalanceRepository);
 
-        return new LeaveRequestProcessor($this->em, $requests, $balances, $this->hrApi);
+        $holidayCalendar = new HolidayCalendar();
+        $workingDays = new WorkingDayCalculator($holidayCalendar);
+        $entitlement = new EntitlementCalculator();
+
+        return new LeaveRequestProcessor($this->em, $requests, $balances, $this->hrApi, $entitlement, $workingDays);
     }
 
     protected function persist(object ...$entities): void
