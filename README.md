@@ -41,10 +41,20 @@ The sample period is the leave year **2025** with a run date of **2025-04-15**.
 
 ## Cursor MCP setup
 
-This repo includes a `.cursor/mcp.json` with the local **tokensave** server and
-the **ToolHive** MCP server configured. ToolHive runs with the MCP optimizer
-enabled, so Cursor routes GitHub and git-read operations through the optimizer
-before calling the underlying MCP tools.
+This repo includes a `.cursor/mcp.json` with the local
+[**tokensave**](https://github.com/tokensave/tokensave) server and the
+[**ToolHive**](https://github.com/stacklok/toolhive/) MCP server configured.
+ToolHive runs with the MCP optimizer enabled, so Cursor routes GitHub and
+git-read operations through the optimizer before calling the underlying MCP
+tools. See the [MCP optimizer setup
+guide](https://docs.stacklok.com/toolhive/tutorials/mcp-optimizer) for the
+ToolHive steps to enable it.
+
+Example: start the local tokensave server from the repo root:
+
+```bash
+tokensave serve
+```
 
 ## What's in the box
 
