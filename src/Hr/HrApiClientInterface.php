@@ -9,7 +9,7 @@ interface HrApiClientInterface
     /**
      * Post a leave decision to the HR system.
      *
-     * @param array<string, mixed> $decision      the decision payload
+     * @param array<string, mixed> $decision       the decision payload
      * @param string               $idempotencyKey sent as the Idempotency-Key header; the HR API
      *                                             returns the original result for a repeated key
      *
