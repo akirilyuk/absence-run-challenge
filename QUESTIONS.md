@@ -42,25 +42,30 @@ For reference — these are the rules I read out of `docs/LEAVE_POLICY.md`:
 _Things you'd want a real product owner to clarify before you commit to a design,
 ordered by how much they'd change the design._
 
-1. **Part-time day counting (biggest gap).** Entitlement is scaled by `workingDaysPerWeek/5`, but §4 counts consumption in plain Mon–Fri working days. We only store the **count** (`3`), not **which** weekdays an employee works. Counting Bjarne's Mon–Fri request as 5 days mixes units (17-day scaled entitlement vs 5-day-week consumption). Should part-timers only consume days on their actual working weekdays — and if so, where does the working-day pattern come from?
+1. **Part-time day counting (biggest gap).** Entitlement is scaled by `workingDaysPerWeek/5`, but §4 counts consumption in plain Mon–Fri working days. We only store the **count** (`3`), not **which** weekdays an employee works. Counting Bjarne's Mon–Fri request as 5 days mixes units (17-day scaled entitlement vs 5-day-week consumption). The weekday pattern matters for **consumed days**, not for holiday lookup. Should part-timers only consume days on their actual working weekdays — and if so, where does the working-day pattern come from?
 
-2. **Leaver pro-rata.** §2 illustrates a joiner only. For someone with `employmentEndDate` mid-year, do we exclude the partial exit month the same way (full-months-only), and do we cap consumption to dates before the end date?
+2. **Leaver pro-rata (decision).** For someone with `employmentEndDate` mid-year, we will **count the exit month as a full month** even if employment ends mid-month, while still using the full-month-only formula in §2.
+   - Example: leave on 2025-06-10 ⇒ full months = Jan–Jun = 6.
 
 3. **Composed rounding.** When pro-rata **and** part-time both apply, round once at the very end (`ceil((c × m/12 × d/5) × 2)/2`) or after each factor? Rounding twice can differ by half a day.
 
 4. **Where is the entitlement cap?** `LeaveBalance` stores `carriedOverDays`/`usedDays` but no total. Confirm the processor derives the cap from `Employee` each run rather than reading it from somewhere authoritative.
+   - Related: for joiners, do we grant the full **pro‑rated annual entitlement up front** based on full months in the year, or should the balance **accrue monthly** as time passes?
+   - Clarify whether a joiner could take their **full pro‑rated annual entitlement immediately** (e.g., join in March, take all pro‑rated days, then leave in April) and still be compliant with policy, or whether there should be an accrual/usage constraint.
 
 5. **No carryover sub-ledger.** There's no `usedCarryoverDays` column, yet C7 requires carryover-first depletion. Track the split in-memory per run and only persist into `usedDays`, or do you want a schema change?
 
 6. **Overlap scope by type.** §10 says "leave periods" but §9 explicitly lets `SICK` overlap `VACATION`. Does the overlap rejection apply only between `VACATION` periods, or to any approved type? Do `PENDING`↔`PENDING` overlaps reject the later submission, or only `PENDING`↔`APPROVED`?
 
 7. **Standalone sick / unpaid approval.** §9 only covers sick *during* vacation. A `SICK` with no overlapping approved vacation, or with `medicalCertificate=false` — always approved record-only? Any rejection path?
+   - Should we apply a **grace period** for medical certificates (e.g., only required after 3 consecutive sick days), and if so how do we count that?
 
 8. **Sick-credit ordering.** Credit-back can free up balance. If a pending vacation and a credit-bearing sick note are in the same run, must sick notes be applied **before** vacations (regardless of `submittedAt`) so the freed days are usable?
 
 9. **Half-day semantics on edges.** If `halfDayStart` falls on a weekend/holiday boundary day, does it apply to the first actual working day or is it ignored? If `start==end` with both flags, is that 0.5, an error, or 0? Do half-day flags mean anything on `SICK`/`UNPAID`/`SPECIAL`?
 
 10. **`SPECIAL` allotment.** §8 says a *separate* allotment, but there is no such field on any entity. Confirm "always approved, balance untouched, `days`=working-day count" is acceptable, or should a special balance be modelled?
+    - If it is always approved with no cap, that implies unlimited special leave. Is that intended, or should we introduce a fixed allowance (per year or per request type)?
 
 11. **HR `days` field meaning.** For `REJECTED`/`SICK`/`UNPAID`/`SPECIAL`, is `days` always `0`, or the working-day count of the range (for reporting), even when no vacation balance moves?
 
@@ -83,6 +88,12 @@ disagree we'll tell you, and if we don't, your code shows your reasoning._
 - Entitlement is **derived at runtime** from `Employee` (contractual, employment dates, `workingDaysPerWeek`); `LeaveBalance` only holds carryover + consumption.
 - **Part-time consumption is counted in plain working days** (Mon–Fri − holidays) for now, because the working-weekday pattern isn't in the data — this is the riskiest assumption (Q1).
 - Composed pro-rata/part-time factors are **multiplied, then rounded up once** to the nearest half-day (`ceil(x * 2) / 2`).
+- For leavers, a mid-month exit still counts the **exit month as a full month** in the pro-rata calculation (explicit decision).
+  - Example: leave on 2025-06-10 ⇒ full months = Jan–Jun = 6.
+- For joiners, a mid-month start excludes that start month; only full months after the start count.
+  - Example: join on 2025-03-10 ⇒ full months = Apr–Dec = 9.
+- For join + leave mid-year, count only full months between (start partial month excluded, exit month included).
+  - Example: join 2025-03-10, leave 2025-10-12 ⇒ full months = Apr–Oct = 7.
 - `runDate` (the `--date` option) drives carryover expiry (C6) and is stamped as `decidedAt`; all `PENDING` rows are eligible regardless of date.
 - Processing order is `submittedAt ASC, id ASC` (as the repository already does); **sick credit-back is applied before vacation decisions** in the same run so freed days are usable, and overlap rejections consider requests approved earlier in the same run.
 - Overlap rejection (C10) is evaluated against **approved `VACATION`** periods; `SICK` may overlap (C9); among two pending vacations the earlier `submittedAt` wins and the later is rejected.

@@ -16,3 +16,4 @@
 
 # Mock HR API runtime state
 /mock-hr-api/state.json
+.idea

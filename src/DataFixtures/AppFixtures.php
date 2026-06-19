@@ -20,6 +20,11 @@ use Doctrine\Persistence\ObjectManager;
  */
 final class AppFixtures extends Fixture
 {
+    /*
+    we need PHP >= 8.3 to support this typed annotation
+    https://www.php.net/manual/en/language.types.declarations.php
+     8.3.0	Support for class, interface, trait, and enum constant typing has been added.
+    */
     private const int LEAVE_YEAR = 2025;
 
     #[\Override]
