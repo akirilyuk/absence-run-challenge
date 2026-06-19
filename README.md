@@ -39,6 +39,13 @@ php bin/phpunit
 
 The sample period is the leave year **2025** with a run date of **2025-04-15**.
 
+## Cursor MCP setup
+
+This repo includes a `.cursor/mcp.json` with the local **tokensave** server and
+the **ToolHive** MCP server configured. ToolHive runs with the MCP optimizer
+enabled, so Cursor routes GitHub and git-read operations through the optimizer
+before calling the underlying MCP tools.
+
 ## What's in the box
 
 | Path | What it is |
