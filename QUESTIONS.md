@@ -126,4 +126,5 @@ real calendar and the §5 holiday tables._
 
 ## Findings during setup
 
-- `composer.json` requires PHP `>=8.2`, but most of the packages resolved in `composer.lock` require PHP 8.4 in practice. The CI/runtime version needs to align with 8.4 for installs to succeed.
+- The README calls out PHP 8.2, while `composer.json` requires PHP `>=8.2`. In practice the dependency set in `composer.lock` expects PHP 8.4 and some language features used in the codebase assume at least PHP 8.3. The runtime/CI version should align to avoid install/runtime issues.
+- The README/doc config points to SQLite (`var/absence.sqlite` and `var/absence_test.sqlite`), but the repo also includes `compose.yaml`/`compose.override.yaml` with Postgres. Should the Docker compose files be removed/ignored, or is there an intended Postgres path we should document?

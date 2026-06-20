@@ -37,6 +37,20 @@ php bin/console app:absence:run --date=2025-04-15
 php bin/phpunit
 ```
 
+### End-to-end test
+
+The end-to-end test exercises the full flow: it recreates the SQLite schema,
+loads both the sample fixtures and additional edge-case fixtures, starts the
+mock HR API, runs the command twice, then checks the DB state and the recorded
+HR decisions (`mock-hr-api/state.json`). It also verifies idempotency keys do
+not grow on a re-run.
+
+Run it directly:
+
+```bash
+php bin/phpunit --filter AbsenceRunEndToEndTest
+```
+
 The sample period is the leave year **2025** with a run date of **2025-04-15**.
 
 ## Cursor MCP setup
