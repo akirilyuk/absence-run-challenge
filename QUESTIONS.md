@@ -121,3 +121,10 @@ real calendar and the §5 holiday tables._
 - **Bjarne Vogt — part-time entitlement vs consumption mismatch.** `28 × 3/5 = 16.8 → 17` entitlement; `usedDays=14` (from the balance seed), leaving **~3** days. Vacation `07-07→07-11` is 5 Mon–Fri days. If counted as 5 plain working days he **rejects**; if it should only count his actual 3 working weekdays it could **approve** — but we don't know which weekdays he works, so the consumed figure is ambiguous (Q1).
 - **Eva — cancelled-but-never-approved + unpaid.** Feb vacation is `CANCELLED` (never `APPROVED`), so C12 "return the days" is a no-op; `usedDays=5` originates elsewhere. `UNPAID 05-05→05-09` must be recorded with **no** balance impact.
 - **Structural gaps in the seed:** no employee has `employmentEndDate` (leaver pro-rata untested), no non-BY/BE state, no cross-year request, and no entity field for the `SPECIAL` allotment referenced in §8.
+
+---
+
+## Findings during setup
+
+- The README calls out PHP 8.2, while `composer.json` requires PHP `>=8.2`. In practice the dependency set in `composer.lock` expects PHP 8.4 and some language features used in the codebase assume at least PHP 8.3. The runtime/CI version should align to avoid install/runtime issues.
+- The README/doc config points to SQLite (`var/absence.sqlite` and `var/absence_test.sqlite`), but the repo also includes `compose.yaml`/`compose.override.yaml` with Postgres. Should the Docker compose files be removed/ignored, or is there an intended Postgres path we should document?

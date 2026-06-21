@@ -16,5 +16,11 @@
 
 # Mock HR API runtime state
 /mock-hr-api/state.json
+.test-logs/
 .idea
 .tokensave
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###

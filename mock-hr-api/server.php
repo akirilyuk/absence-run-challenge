@@ -17,7 +17,6 @@ declare(strict_types=1);
  * State is persisted to mock-hr-api/state.json so idempotency survives across
  * requests (each request to the built-in server is a fresh process).
  */
-
 $token = getenv('HR_API_TOKEN') ?: 'demo-secret-token-7Qx2';
 $stateFile = __DIR__.'/state.json';
 
